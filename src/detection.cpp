@@ -8,6 +8,7 @@
 #define OBJECT_ITEM_MANUFACTURER "manufacturer"
 #define OBJECT_ITEM_SERIAL_NUMBER "serialNumber"
 #define OBJECT_ITEM_DEVICE_ADDRESS "deviceAddress"
+#define OBJECT_ITEM_DEVICE_MOUNT_PATH "mountPath"
 
 
 Nan::Callback* addedCallback;
@@ -55,6 +56,7 @@ void NotifyAdded(ListResultItem_t* it) {
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_MANUFACTURER).ToLocalChecked(), Nan::New<v8::String>(it->manufacturer.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_SERIAL_NUMBER).ToLocalChecked(), Nan::New<v8::String>(it->serialNumber.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_ADDRESS).ToLocalChecked(), Nan::New<v8::Number>(it->deviceAddress));
+		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_MOUNT_PATH).ToLocalChecked(), Nan::New<v8::String>(it->mountPath.c_str()).ToLocalChecked());
 		argv[0] = item;
 
 		addedCallback->Call(1, argv);
@@ -100,6 +102,7 @@ void NotifyRemoved(ListResultItem_t* it) {
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_MANUFACTURER).ToLocalChecked(), Nan::New<v8::String>(it->manufacturer.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_SERIAL_NUMBER).ToLocalChecked(), Nan::New<v8::String>(it->serialNumber.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_ADDRESS).ToLocalChecked(), Nan::New<v8::Number>(it->deviceAddress));
+		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_MOUNT_PATH).ToLocalChecked(), Nan::New<v8::String>(it->mountPath.c_str()).ToLocalChecked());
 		argv[0] = item;
 
 		removedCallback->Call(1, argv);
@@ -186,6 +189,7 @@ void EIO_AfterFind(uv_work_t* req) {
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_MANUFACTURER).ToLocalChecked(), Nan::New<v8::String>((*it)->manufacturer.c_str()).ToLocalChecked());
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_SERIAL_NUMBER).ToLocalChecked(), Nan::New<v8::String>((*it)->serialNumber.c_str()).ToLocalChecked());
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_ADDRESS).ToLocalChecked(), Nan::New<v8::Number>((*it)->deviceAddress));
+			item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_MOUNT_PATH).ToLocalChecked(), Nan::New<v8::String>((*it)->mountPath.c_str()).ToLocalChecked());
 			results->Set(i, item);
 		}
 		argv[0] = Nan::Undefined();
