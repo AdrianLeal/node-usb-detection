@@ -34,6 +34,8 @@ struct ListBaton {
 		int pid;
 };
 
+void RegisterLog(const Nan::FunctionCallbackInfo<v8::Value>& args);
+void NotifyLog(std::string msg);
 void RegisterAdded(const Nan::FunctionCallbackInfo<v8::Value>& args);
 void NotifyAdded(ListResultItem_t* it);
 void RegisterRemoved(const Nan::FunctionCallbackInfo<v8::Value>& args);

@@ -82,6 +82,10 @@ if (global[index.name] && global[index.name].version === index.version) {
 		detector.emit('change:' + device.vendorId, device);
 		detector.emit('change', device);
 	});
+	
+	detection.registerLog(function(msg) {
+		detector.emit('log', msg);
+	});
 
 	var started = true;
 

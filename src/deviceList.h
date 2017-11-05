@@ -13,6 +13,7 @@ typedef struct {
 		std::string manufacturer;
 		std::string serialNumber;
 		int deviceAddress;
+		std::string devNode;
 		std::string mountPath;
 } ListResultItem_t;
 

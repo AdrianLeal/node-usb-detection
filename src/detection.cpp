@@ -8,6 +8,7 @@
 #define OBJECT_ITEM_MANUFACTURER "manufacturer"
 #define OBJECT_ITEM_SERIAL_NUMBER "serialNumber"
 #define OBJECT_ITEM_DEVICE_ADDRESS "deviceAddress"
+#define OBJECT_ITEM_DEVICE_DEV_NODE "devNode"
 #define OBJECT_ITEM_DEVICE_MOUNT_PATH "mountPath"
 
 
@@ -16,6 +17,48 @@ bool isAddedRegistered = false;
 
 Nan::Callback* removedCallback;
 bool isRemovedRegistered = false;
+
+Nan::Callback* logCallback;
+bool isLogRegistered = false;
+
+void RegisterLog(const Nan::FunctionCallbackInfo<v8::Value>& args) {
+	Nan::HandleScope scope;
+
+	v8::Local<v8::Function> callback;
+
+	if (args.Length() == 0) {
+		return Nan::ThrowTypeError("First argument must be a function");
+	}
+
+	if (args.Length() == 1) {
+		// callback
+		if(!args[0]->IsFunction()) {
+			return Nan::ThrowTypeError("First argument must be a function");
+		}
+
+		callback = args[0].As<v8::Function>();
+	}
+
+	logCallback = new Nan::Callback(callback);
+	isLogRegistered = true;
+}
+
+void NotifyLog(std::string msg) {
+	Nan::HandleScope scope;
+
+	if (&msg == NULL) {
+		return;
+	}
+
+	if (isLogRegistered){
+		v8::Local<v8::Value> argv[1];
+		//v8::String::Utf8Value s(*msg);
+		
+		argv[0] = Nan::New<v8::String>(msg).ToLocalChecked();
+
+		logCallback->Call(1, argv);
+	}
+}
 
 void RegisterAdded(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	Nan::HandleScope scope;
@@ -56,7 +99,9 @@ void NotifyAdded(ListResultItem_t* it) {
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_MANUFACTURER).ToLocalChecked(), Nan::New<v8::String>(it->manufacturer.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_SERIAL_NUMBER).ToLocalChecked(), Nan::New<v8::String>(it->serialNumber.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_ADDRESS).ToLocalChecked(), Nan::New<v8::Number>(it->deviceAddress));
+		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_DEV_NODE).ToLocalChecked(), Nan::New<v8::String>(it->devNode.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_MOUNT_PATH).ToLocalChecked(), Nan::New<v8::String>(it->mountPath.c_str()).ToLocalChecked());
+		
 		argv[0] = item;
 
 		addedCallback->Call(1, argv);
@@ -102,6 +147,7 @@ void NotifyRemoved(ListResultItem_t* it) {
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_MANUFACTURER).ToLocalChecked(), Nan::New<v8::String>(it->manufacturer.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_SERIAL_NUMBER).ToLocalChecked(), Nan::New<v8::String>(it->serialNumber.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_ADDRESS).ToLocalChecked(), Nan::New<v8::Number>(it->deviceAddress));
+		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_DEV_NODE).ToLocalChecked(), Nan::New<v8::String>(it->devNode.c_str()).ToLocalChecked());
 		item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_MOUNT_PATH).ToLocalChecked(), Nan::New<v8::String>(it->mountPath.c_str()).ToLocalChecked());
 		argv[0] = item;
 
@@ -110,6 +156,7 @@ void NotifyRemoved(ListResultItem_t* it) {
 }
 
 void Find(const Nan::FunctionCallbackInfo<v8::Value>& args) {
+	NotifyLog("Finding....");
 	Nan::HandleScope scope;
 
 	int vid = 0;
@@ -189,6 +236,7 @@ void EIO_AfterFind(uv_work_t* req) {
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_MANUFACTURER).ToLocalChecked(), Nan::New<v8::String>((*it)->manufacturer.c_str()).ToLocalChecked());
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_SERIAL_NUMBER).ToLocalChecked(), Nan::New<v8::String>((*it)->serialNumber.c_str()).ToLocalChecked());
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_ADDRESS).ToLocalChecked(), Nan::New<v8::Number>((*it)->deviceAddress));
+			item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_DEV_NODE).ToLocalChecked(), Nan::New<v8::String>((*it)->devNode.c_str()).ToLocalChecked());
 			item->Set(Nan::New<v8::String>(OBJECT_ITEM_DEVICE_MOUNT_PATH).ToLocalChecked(), Nan::New<v8::String>((*it)->mountPath.c_str()).ToLocalChecked());
 			results->Set(i, item);
 		}
@@ -218,6 +266,7 @@ extern "C" {
 		Nan::SetMethod(target, "find", Find);
 		Nan::SetMethod(target, "registerAdded", RegisterAdded);
 		Nan::SetMethod(target, "registerRemoved", RegisterRemoved);
+		Nan::SetMethod(target, "registerLog", RegisterLog);
 		Nan::SetMethod(target, "startMonitoring", StartMonitoring);
 		Nan::SetMethod(target, "stopMonitoring", StopMonitoring);
 		InitDetection();
@@ -225,3 +274,5 @@ extern "C" {
 }
 
 NODE_MODULE(detection, init);
+
+
