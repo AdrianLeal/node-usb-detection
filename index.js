@@ -28,7 +28,6 @@ if (global[index.name] && global[index.name].version === index.version) {
 			pid = undefined;
 		}
 
-
 		return new Promise(function(resolve, reject) {
 			// Assemble the optional args into something we can use with `apply`
 			var args = [];

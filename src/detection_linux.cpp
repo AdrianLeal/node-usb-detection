@@ -96,7 +96,8 @@ void NotifyFinished(uv_work_t* req)
     }
 
     SignalDeviceHandled();
-    uv_queue_work(uv_default_loop(), req, NotifyAsync, (uv_after_work_cb)NotifyFinished);
+    if (isRunning)
+	uv_queue_work(uv_default_loop(), req, NotifyAsync, (uv_after_work_cb)NotifyFinished);
 }
 
 void Start()
@@ -110,6 +111,10 @@ void Stop()
     isRunning = false;
     pthread_mutex_lock(&notify_mutex);
     pthread_cond_signal(&notifyNewDevice);
+    pthread_mutex_unlock(&notify_mutex);
+    
+    pthread_mutex_lock(&notify_mutex);
+    pthread_cond_signal(&notifyDeviceHandled);
     pthread_mutex_unlock(&notify_mutex);
 }
 
@@ -352,11 +357,12 @@ void InitDetection()
     pthread_mutex_init(&notify_mutex, NULL);
     pthread_cond_init(&notifyNewDevice, NULL);
     pthread_cond_init(&notifyDeviceHandled, NULL);       
+    
+    Start();
 
     uv_work_t *req = new uv_work_t();
     uv_queue_work(uv_default_loop(), req, NotifyAsync, (uv_after_work_cb)NotifyFinished);
-
-    Start();
+    
     pthread_create(&thread, NULL, ThreadFunc, NULL);    
 }
 
@@ -638,8 +644,8 @@ void* ThreadFunc(void* ptr)
 		//}					
 	}
 	usleep(250*1000);
-	printf(".");
-	fflush(stdout);
+	//printf(".");
+	//fflush(stdout);
     
     
         /* Make the call to receive the device.
@@ -681,6 +687,8 @@ void* ThreadFunc(void* ptr)
         }
         */
     }
+    
+    udev_unref(udev);
 
     return NULL;
 }

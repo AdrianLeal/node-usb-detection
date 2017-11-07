@@ -50,7 +50,8 @@ describe('usb-detection', function() {
 			.to.have.all.keys(deviceObjectFixture)
 			.that.is.an('object');
 	};
-		
+	
+	/*	
 	describe('`.find`', function() {
 
 		var testArrayOfDevicesShape = function(devices) {
@@ -77,6 +78,7 @@ describe('usb-detection', function() {
 				.to.eventually.be.fulfilled;
 		});
 	});
+	*/
 
 
 	describe('Events `.on`', function() {
@@ -118,7 +120,10 @@ describe('usb-detection', function() {
 		// After this call, the process will be able to quit
 		usbDetect.stopMonitoring();
 		
-		process.exit();
+		//console.log(process._getActiveRequests());
+	    	//console.log(process._getActiveHandles());
+		
+		//process.exit();
 	});
 
 });
